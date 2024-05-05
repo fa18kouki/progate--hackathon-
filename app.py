@@ -186,12 +186,12 @@ def sqlite_update(USER_ID, NICKNAME, MODEL):
     conn.close()
 
 
-def changeLLMModel(USER_ID):
+def changeLLMModel(USER_ID, MODEL):
     conn = sqlite3.connect('instance/db.sqlite3')
     cursor = conn.cursor()
 
     user_id = USER_ID
-    model = "gpt-4"
+    model = MODEL
     update_query = """
         UPDATE users
         SET model = ?
@@ -422,14 +422,7 @@ def handle_postback(event):
     action, info = data.split(':')
     if action == "update":
         field, value = info.split(',')
-        # ユーザー情報を更新
-        user = User.query.filter_by(user_id=user_id).first()
-        if user:
-            setattr(user, field, value)
-            db.session.commit()
-            response_message = f"{field}を更新しました。新しい値: {value}"
-        else:
-            response_message = "ユーザー情報が見つかりません。"
+        changeLLMModel(user_id, value)
     else:
         response_message = "不明なアクションです。"
 
@@ -457,7 +450,7 @@ def handle_message(event):
                 title='あなたの選択', text='以下から選んでください', actions=[
                     PostbackAction(label='gpt3.5を使用する', data='update:model,gpt3.5-turbo'),
                     PostbackAction(label='gpt4を使用する', data='update:model,gpt4-turbo'),
-                    PostbackAction(label='gemini1.5Proを使用する', data='update:model,gpt4-turbo'),
+                    PostbackAction(label='gemini1.5Proを使用する', data='update:model,gemini1.5Pro-turbo'),
                 ]
             )
             template_message = TemplateSendMessage(
