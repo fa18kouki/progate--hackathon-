@@ -329,6 +329,9 @@ def custom_static(filename):
 def transcribe():
     return render_template("transcribe.html")
 
+@app.route("/recruiter")
+def recruiter():
+    return render_template("recruit.html")
 
 @app.route("/audio")
 def audio():
