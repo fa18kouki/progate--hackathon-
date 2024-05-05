@@ -5,13 +5,136 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=0.1, maximum-scale=4, user-scalable=yes">
   <link rel="stylesheet" href="../static/css/audio.css">
   <script src="../static/js/audio-dev.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+    }
+    #Control {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    #Control button {
+      margin: 10px;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    #Control button:hover {
+      background-color: #45a049;
+    }
+    #Counter, #Volume {
+      margin: 10px;
+    }
+    #Options {
+      text-align: center;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 10px;
+      box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+      background-color: #fff;
+    }
+    #Options h3 {
+      margin-top: 0;
+      color: #333;
+    }
+    #Options ul {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+    #Options ul li {
+      margin-bottom: 10px;
+      padding: 5px;
+      background-color: #f9f9f9;
+      border-radius: 3px;
+      transition: background-color 0.3s;
+    }
+    #Options ul li:hover {
+      background-color: #f0f0f0;
+    }
+  </style>
 </head>
 <body>
   <div id="Control">
-    <button id="MicOn">マイクの使用を開始</button><br/>
+    <button id="MicOn">マイクの使用を開始</button>
     <button id="RecStart">録音開始</button>
-    <button id="RecStop" disabled>録音終了</button><br>
+    <button id="RecStop" disabled>録音終了</button>
     <div id="RecMime"></div>
+    <div id="Counter">録音時間: <span id="RecordTime">0</span> 秒</div>
+    <div id="Volume">音量: <span id="VolumeLevel">0</span></div>
   </div>
+  <div id="Options">
+    <h3>録画リスト:</h3>
+    <ul>
+      <li>履歴1</li>
+      <li>履歴2</li>
+      <li>履歴3</li>
+    </ul>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      let isRecording = false;
+      let startTime;
+      let timerInterval;
+
+      const RecStartButton = document.getElementById('RecStart');
+      const RecStopButton = document.getElementById('RecStop');
+      const RecordTimeSpan = document.getElementById('RecordTime');
+      const VolumeLevelSpan = document.getElementById('VolumeLevel');
+
+      RecStartButton.addEventListener('click', function() {
+        isRecording = true;
+        startTime = new Date().getTime() / 1000;
+        timerInterval = setInterval(updateTimer, 1000);
+        RecStartButton.disabled = true;
+        RecStopButton.disabled = false;
+      });
+
+      RecStopButton.addEventListener('click', function() {
+        isRecording = false;
+        clearInterval(timerInterval);
+        RecStartButton.disabled = false;
+        RecStopButton.disabled = true;
+      });
+
+      function updateTimer() {
+        const currentTime = new Date().getTime() / 1000;
+        const elapsedTime = Math.round(currentTime - startTime);
+        RecordTimeSpan.textContent = elapsedTime;
+      }
+
+      navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
+        const audioContext = new AudioContext();
+        const mediaStreamSource = audioContext.createMediaStreamSource(stream);
+        const analyser = audioContext.createAnalyser();
+        mediaStreamSource.connect(analyser);
+        analyser.fftSize = 256;
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+
+        function updateVolume() {
+          analyser.getByteFrequencyData(dataArray);
+          let sum = 0;
+          for (let i = 0; i < bufferLength; i++) {
+            sum += dataArray[i];
+          }
+          const volume = sum / bufferLength;
+          VolumeLevelSpan.textContent = Math.round(volume);
+        }
+
+        setInterval(updateVolume, 100);
+      }).catch(function(err) {
+        console.log('The following error occurred: ' + err);
+      });
+    });
+  </script>
 </body>
 </html>

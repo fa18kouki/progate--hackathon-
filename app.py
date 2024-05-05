@@ -317,7 +317,7 @@ def line_login():
 
     gcs_client = CloudStorageManager("user-backets")
     image_urls = gcs_client.get_user_images(decoded_id_token["sub"])
-    return render_template("line_success.html", image_urls=image_urls,user_profile=decoded_id_token)
+    return render_template("line_success.html", image_urls=image_urls,user_profile=new_line_id_token)
 
 @app.route('/images/<path:filename>')
 def custom_static(filename):
@@ -457,8 +457,9 @@ def handle_message(event):
                 title='あなたの選択', text='以下から選んでください', actions=[
                     PostbackAction(label='gpt3.5を使用する', data='update:model,gpt3.5-turbo'),
                     PostbackAction(label='gpt4を使用する', data='update:model,gpt4-turbo').
-                    PostbackAction(label='gemini1.5Proを使用する', data='update:model,gpt4-turbo')
-                ])
+                    PostbackAction(label='gemini1.5Proを使用する', data='update:model,gpt4-turbo'),
+                ]
+            )
             template_message = TemplateSendMessage(
                 alt_text='他のモデルを使用する', template=buttons_template)
             line_bot_api.reply_message(
