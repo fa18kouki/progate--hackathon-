@@ -570,13 +570,13 @@ def handle_image(event):
     corrected_text = formatTextFromImage(res)
 
     # ユーザーに修正されたテキストを送信
-    line_bot_api.push_message(user_id, TextSendMessage(text=corrected_text))
+    line_bot_api.push_message(user_id, TextSendMessage(text="画像認識で取得した文章:\n"+corrected_text))
 
     # さらにGPTに渡して欠点を指摘
     response = ESAdviceGPT(corrected_text)
 
     # ユーザーに欠点を指摘
-    line_bot_api.push_message(user_id, TextSendMessage(text=response))
+    line_bot_api.push_message(user_id, TextSendMessage(text="指摘:\n"+response))
 
     # ユーザーのIDとメッセージをGoogle Cloud Storageに保存
     gcs_client = CloudStorageManager("user-backets")
