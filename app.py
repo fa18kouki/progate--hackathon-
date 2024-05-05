@@ -456,7 +456,7 @@ def handle_message(event):
             buttons_template = ButtonsTemplate(
                 title='あなたの選択', text='以下から選んでください', actions=[
                     PostbackAction(label='gpt3.5を使用する', data='update:model,gpt3.5-turbo'),
-                    PostbackAction(label='gpt4を使用する', data='update:model,gpt4-turbo').
+                    PostbackAction(label='gpt4を使用する', data='update:model,gpt4-turbo'),
                     PostbackAction(label='gemini1.5Proを使用する', data='update:model,gpt4-turbo'),
                 ]
             )
