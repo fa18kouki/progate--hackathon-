@@ -19,7 +19,7 @@ def chatGPTResponse(prompts, model, user_id, system_prompts=system_prompts, temp
         model = "gpt-4"
     response = openai.ChatCompletion.create(
         model=model,
-        messages=[
+        messages=[ 
             {"role": "system", "content": system_prompts},  # システムメッセージの設定
             {"role": "system", "content": user_history},
             {"role": "user", "content": prompts},  # 変換されたテキストをユーザーメッセージとして使用

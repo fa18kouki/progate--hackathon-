@@ -24,7 +24,7 @@ from gcs_client import CloudStorageManager
 # from . import MicrophoneStream
 from datetime import datetime, timedelta
 import ocr as gcpapi
-from llm import chatGPTResponse, formatTextFromImage, ESAdviceGPT,formatTextFromInfo
+from llm import chatGPTResponse, formatTextFromImage, ESAdviceGPT,formatTextFromInfo,responseLLM
 # from langchain.chains import OpenAIChain
 # from langchain.schema import Function
 
@@ -423,14 +423,14 @@ def handle_postback(event):
     if action == "update":
         field, value = info.split(',')
         changeLLMModel(user_id, value)
+        
     else:
         response_message = "不明なアクションです。"
-
-    # ユーザーに応答メッセージを送信
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=response_message)
-    )
+        # ユーザーに応答メッセージを送信
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=response_message)
+        )
 
 
 @handler.add(MessageEvent, message=TextMessage)
@@ -447,7 +447,7 @@ def handle_message(event):
         user_id = event.source.user_id  # ユーザーのIDを取得
         if event.message.text == "他のモデルを使用する":
             buttons_template = ButtonsTemplate(
-                title='あなたの選択', text='以下から選んでください', actions=[
+                title='LLMを選択', text='以下から選んでください', actions=[
                     PostbackAction(label='gpt3.5を使用する', data='update:model,gpt3.5-turbo'),
                     PostbackAction(label='gpt4を使用する', data='update:model,gpt4-turbo'),
                     PostbackAction(label='gemini1.5Proを使用する', data='update:model,gemini1.5Pro-turbo'),
@@ -468,18 +468,17 @@ def handle_message(event):
         display_name = line_bot_api.get_profile(user_id).display_name  # ユーザーの表示名を取得
         ensure_user_exists(user_id, display_name)
         model = getLLMModel(event.source.user_id)
-        
         gcs_client = CloudStorageManager("user-backets")
         gcs_client.ensure_user_storage(user_id)
         gcs_client.writeChatHistory(user_id, "user", user_message)
         # ユーザーのメッセージを使用してレスポンスを生成
-        GPTresponse = chatGPTResponse(user_message, model, user_id)
+        LLMresponse = responseLLM(user_message, model)
         res = f"あなたのユーザーIDは{user_id}です。\n"
         res += f"{display_name}さん、こんにちは！\n"
         res += f"現在のモデルは{model}です。\n"
         res +=f"SQLから取得したモデルは{getLLMModel(event.source.user_id)}です。\n"
-        res += GPTresponse
-        gcs_client.writeChatHistory(user_id, "system", GPTresponse)
+        res += LLMresponse
+        gcs_client.writeChatHistory(user_id, "system", LLMresponse)
         # LINEユーザーにレスポンスを返信
         line_bot_api.reply_message(
             event.reply_token,
