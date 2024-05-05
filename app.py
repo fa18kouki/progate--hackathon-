@@ -11,7 +11,6 @@ import sqlite3
 import base64
 from pathlib import Path
 from flask_migrate import Migrate
-from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask, request, abort, render_template, send_from_directory,redirect, url_for
 from linebot import LineBotApi, WebhookHandler
@@ -329,9 +328,9 @@ def custom_static(filename):
 def transcribe():
     return render_template("transcribe.html")
 
-@app.route("/recruiter")
+@app.route("/recruite")
 def recruiter():
-    return render_template("recruit.html")
+    return render_template("recruite.html")
 
 @app.route("/audio")
 def audio():
