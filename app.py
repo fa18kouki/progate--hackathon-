@@ -460,8 +460,8 @@ def handle_message(event):
                 event.reply_token, template_message)
             return 
         if "#自己紹介" in user_message:
-            line_bot_api.reply_message(
-                event.reply_token,
+            line_bot_api.push_message(
+                user_id,
                 TextSendMessage(text="自己紹介文の読み取りをしてデータベースに追加します。")
             )
             key1, NICKNAME = extract_value(user_message, "ニックネーム")
