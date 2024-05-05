@@ -34,7 +34,7 @@ def geminiResponse(prompt):
     model = GenerativeModel("gemini-pro")
     response = model.predict(prompt, max_tokens=100, temperature=0.5)
 
-def responseLLM(prompt, model):
+def responseLLM(prompt, model, user_id):
     response = None
     if model == "gemini-1.5":
         response = requests.post(
@@ -51,7 +51,7 @@ def responseLLM(prompt, model):
         )
         response = response.json()
     else:
-        responcse = chatGPTResponse(prompt, model)
+        responcse = chatGPTResponse(prompt, model,user_id)
     if not response:
         return "エラーが発生しました"
     

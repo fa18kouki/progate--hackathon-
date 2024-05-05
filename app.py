@@ -423,7 +423,12 @@ def handle_postback(event):
     if action == "update":
         field, value = info.split(',')
         changeLLMModel(user_id, value)
-        
+        response_message = "モデルを更新しました。"
+        # ユーザーに応答メッセージを送信
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=response_message)
+        )
     else:
         response_message = "不明なアクションです。"
         # ユーザーに応答メッセージを送信
@@ -472,7 +477,7 @@ def handle_message(event):
         gcs_client.ensure_user_storage(user_id)
         gcs_client.writeChatHistory(user_id, "user", user_message)
         # ユーザーのメッセージを使用してレスポンスを生成
-        LLMresponse = responseLLM(user_message, model)
+        LLMresponse = responseLLM(user_message, model,user_id)
         res = f"あなたのユーザーIDは{user_id}です。\n"
         res += f"{display_name}さん、こんにちは！\n"
         res += f"現在のモデルは{model}です。\n"
