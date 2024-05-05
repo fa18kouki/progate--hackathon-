@@ -23,7 +23,7 @@ curl -v -X POST https://api.line.me/v2/bot/richmenu \
             "action": {
                 "type": "message",
                 "label": "タップ領域A",
-                "text": "GPT-4を使用する"
+                "text": "他のモデルを使用する"
             }
         },
         {
@@ -57,12 +57,12 @@ curl -v -X POST https://api.line.me/v2/bot/richmenu \
 
 richmenu-id:richmenu-f7f57400b5041cec5e17b2bd774097b5
 richmenu-1b698ab3e127e69ad4af403fc040cbb0
-curl -v -X POST https://api-data.line.me/v2/bot/richmenu/{richmenu-1b698ab3e127e69ad4af403fc040cbb0}/content \
+curl -v -X POST https://api-data.line.me/v2/bot/richmenu/{richmenu-8fe2d30cbb85046562d3b74d0aa45f06}/content \
 -H "Authorization: Bearer {G/GWajx/dWCMiTnd8NYQuthmw9MZxenLJHOfJys515rjFaYy32FuA1GZQY3TRFh2XCRB3987ekmDBHmfv4StheSuWQKtzIHKR4feBbUQ6AYO6CWgnDpm3Ce8iWkbHnfmRA4c0WpQd/yL8k0nmU2a3AdB04t89/1O/w1cDnyilFU=}" \
 -H "Content-Type: image/png" \
 -T richmenu-guide.png
 
-curl -v -X POST https://api.line.me/v2/bot/user/all/richmenu/{richmenu-1b698ab3e127e69ad4af403fc040cbb0} \
+curl -v -X POST https://api.line.me/v2/bot/user/all/richmenu/{richmenu-8fe2d30cbb85046562d3b74d0aa45f06} \
 -H "Authorization: Bearer {G/GWajx/dWCMiTnd8NYQuthmw9MZxenLJHOfJys515rjFaYy32FuA1GZQY3TRFh2XCRB3987ekmDBHmfv4StheSuWQKtzIHKR4feBbUQ6AYO6CWgnDpm3Ce8iWkbHnfmRA4c0WpQd/yL8k0nmU2a3AdB04t89/1O/w1cDnyilFU=}"
 
 curl -v -X GET https://api.line.me/v2/bot/profile/{U1b99551259446b6afde167fce718ad45} \

@@ -113,33 +113,6 @@ class User(db.Model):
     updated_at = db.Column(
         db.DateTime, default=datetime.now, onupdate=datetime.now)
 
-def sqlite_update(USER_ID, NICKNAME, MODEL, AGE, LIBERAL, RESIDENCE, INFO):
-    conn = sqlite3.connect('instance/db.sqlite3')
-    cursor = conn.cusor()
-
-    user_id = USER_ID
-    nickname = NICKNAME
-    model = MODEL
-    age = AGE
-    liberal = LIBERAL
-    residence = RESIDENCE
-    info = INFO
-    # SQLインジェクション対策
-    update_query = """
-        UPDATE users
-        SET nickname = ?,
-            model = ?,
-            age = ?,
-            liberal = ?,
-            residence = ?,
-            info = ?
-        WHERE user_id = ?
-    """
-
-    cursor.execute(update_query, (user_id, nickname,model,age,liberal,residence,info,user_id))
-    conn.commit()
-    conn.close()
-
 
 def get_user_ids():
     # SQLite3データベースに接続
@@ -178,25 +151,30 @@ scheduler.add_job(send_encouragement_message, 'cron', hour=22, minute=10)
 scheduler.start()
 
 # データベースの更新->ユーザーの任意のタイミングで実行する
-
-
-def sqlite_update(USER_ID, NICKNAME, MODEL):
+def sqlite_update(USER_ID, NICKNAME, MODEL, AGE, LIBERAL, RESIDENCE, INFO):
     conn = sqlite3.connect('instance/db.sqlite3')
-    cursor = conn.cursor()
+    cursor = conn.cusor()
 
     user_id = USER_ID
     nickname = NICKNAME
     model = MODEL
-
+    age = AGE
+    liberal = LIBERAL
+    residence = RESIDENCE
+    info = INFO
     # SQLインジェクション対策
     update_query = """
         UPDATE users
         SET nickname = ?,
-            model = ?
+            model = ?,
+            age = ?,
+            liberal = ?,
+            residence = ?,
+            info = ?
         WHERE user_id = ?
     """
 
-    cursor.execute(update_query, (nickname, model, user_id))
+    cursor.execute(update_query, (user_id, nickname,model,age,liberal,residence,info,user_id))
     conn.commit()
     conn.close()
 
