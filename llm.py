@@ -51,7 +51,7 @@ def responseLLM(prompt, model, user_id):
         )
         response = response.json()
     else:
-        responcse = chatGPTResponse(prompt, model,user_id)
+        response = chatGPTResponse(prompt, model,user_id)
     if not response:
         return "エラーが発生しました"
     
