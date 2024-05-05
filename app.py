@@ -153,7 +153,7 @@ scheduler.start()
 # データベースの更新->ユーザーの任意のタイミングで実行する
 def sqlite_update(USER_ID, NICKNAME, MODEL, AGE, LIBERAL, RESIDENCE, INFO):
     conn = sqlite3.connect('instance/db.sqlite3')
-    cursor = conn.cusor()
+    cursor = conn.cursor()
 
     user_id = USER_ID
     nickname = NICKNAME
