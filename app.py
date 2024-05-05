@@ -472,7 +472,7 @@ def handle_message(event):
             key6, JOB = extract_value(user_message, "希望職種")
             key7, CAREER = extract_value(user_message, "簡単な経歴")
             
-            sqlite_update(user_id, NICKNAME, AGE, RESIDENCE, GRADE, SUBJECT, JOB, CAREER)
+            sqlite_update(user_id, NICKNAME, AGE, RESIDENCE, SUBJECT, JOB, CAREER)
             line_bot_api.push_message(
                 user_id,
                 TextSendMessage(text="データベースの更新が完了しました。")
