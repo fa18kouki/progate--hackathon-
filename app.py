@@ -65,6 +65,22 @@ gcs_user_manager = CloudStorageManager("user-backets")
 ## SQLite3データベース設定##
 
 
+def extract_value(intro_text, key):
+    # 自己紹介文を行ごとに分割
+    lines = intro_text.split('\n')
+    
+    # 指定されたキーに対応する行を検索
+    for line in lines:
+        if key in line:
+            # ":" を使用して行をキーと値に分割
+            parts = line.split(':')
+            # キーと値の両方があるか確認
+            if len(parts) == 2:
+                # キーと値を返す（両端の空白を削除）
+                return parts[0].strip(), parts[1].strip()
+    # キーが見つからない場合は None を返す
+    return None, None
+
 def ensure_user_exists(user_id, nickname):
     # データベースに接続
     conn = sqlite3.connect('instance/db.sqlite3')
@@ -465,13 +481,26 @@ def handle_message(event):
             line_bot_api.reply_message(
                 event.reply_token, template_message)
             return 
-        if "自己紹介文:" in user_message:
-            res = formatTextFromInfo(user_message)
+        if "自己紹介:" in user_message:
             
             line_bot_api.reply_message(
                 event.reply_token,
-                TextSendMessage(text="自己紹介文が含まれています。")
+                TextSendMessage(text="自己紹介文の読み取りをしてデータベースに追加します。")
             )
+            key1, NICKNAME = extract_value(user_message, "ニックネーム")
+            key2, AGE = extract_value(user_message, "年齢")
+            key3, RESIDENCE = extract_value(user_message, "居住地")
+            key4, GRADE = extract_value(user_message, "学年")
+            key5, SUBJECT = extract_value(user_message, "文理選択")
+            key6, JOB = extract_value(user_message, "希望職種")
+            key7, CAREER = extract_value(user_message, "簡単な経歴")
+            
+            sqlite_update(user_id, NICKNAME, AGE, RESIDENCE, GRADE, SUBJECT, JOB, CAREER)
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text="データベースの更新が完了しました。")
+            )
+            return
         display_name = line_bot_api.get_profile(user_id).display_name  # ユーザーの表示名を取得
         ensure_user_exists(user_id, display_name)
         model = getLLMModel(event.source.user_id)
@@ -480,10 +509,7 @@ def handle_message(event):
         gcs_client.writeChatHistory(user_id, "user", user_message)
         # ユーザーのメッセージを使用してレスポンスを生成
         LLMresponse = responseLLM(user_message, model,user_id)
-        res = f"あなたのユーザーIDは{user_id}です。\n"
-        res += f"{display_name}さん、こんにちは！\n"
-        res += f"現在のモデルは{model}です。\n"
-        res +=f"SQLから取得したモデルは{getLLMModel(event.source.user_id)}です。\n"
+        res = f"現在のモデルは{model}です。\n"
         res += LLMresponse
         gcs_client.writeChatHistory(user_id, "system", LLMresponse)
         # LINEユーザーにレスポンスを返信
