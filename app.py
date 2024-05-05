@@ -400,7 +400,7 @@ def handle_follow(event):
     db.session.commit()
     # ユーザーIDをログに記録
     app.logger.info(f"新しいユーザーが追加されました: {new_user.user_id}")  # 修正された行
-    welcome_message = "ご登録ありがとうございます。"+"ようこそブタチームの就活支援サービスへ！\n"+ "次の情報を教えてくれると、より適切なサポートができます!!\n"+"年齢、ニックネーム、居住地、文理選択、希望職種、簡単な経歴"
+    welcome_message = "ご登録ありがとうございます。"+"ようこそブタチームの就活支援サービスへ！\n"+ "#自己紹介を入れて次の情報を教えてくれると、より適切なサポートができます!!\n"+"年齢、ニックネーム、居住地、文理選択、希望職種、簡単な経歴"
     service_description = "こちらは、音声認識を用いた面接練習や、画像認識でのES添削などができる就活生向けのLINEbotです。ESを添削してもらいたい場合は画像をアップロードし、面接練習をしたい場合は下のタブメニューから選んでください！"
     messages = [
         TextSendMessage(text=welcome_message),
@@ -459,8 +459,7 @@ def handle_message(event):
             line_bot_api.reply_message(
                 event.reply_token, template_message)
             return 
-        if "自己紹介:" in user_message:
-            
+        if "#自己紹介" in user_message:
             line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(text="自己紹介文の読み取りをしてデータベースに追加します。")
@@ -474,8 +473,8 @@ def handle_message(event):
             key7, CAREER = extract_value(user_message, "簡単な経歴")
             
             sqlite_update(user_id, NICKNAME, AGE, RESIDENCE, GRADE, SUBJECT, JOB, CAREER)
-            line_bot_api.reply_message(
-                event.reply_token,
+            line_bot_api.push_message(
+                user_id,
                 TextSendMessage(text="データベースの更新が完了しました。")
             )
             return
