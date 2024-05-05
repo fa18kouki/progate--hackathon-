@@ -1,6 +1,8 @@
 import openai
 from dotenv import load_dotenv
 import os
+import requests
+from google.generativeai import *
 from gcs_client import CloudStorageManager
 load_dotenv()
 
@@ -26,8 +28,33 @@ def chatGPTResponse(prompts, model, user_id, system_prompts=system_prompts, temp
     )
     return response.choices[0].message['content'].strip()
 
-# def geminiResponse(prompt):
+def geminiResponse(prompt):
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+    configure(api_key=API_KEY)
+    model = GenerativeModel("gemini-pro")
+    response = model.predict(prompt, max_tokens=100, temperature=0.5)
 
+def responseLLM(prompt, model):
+    response = None
+    if model == "gemini-1.5":
+        response = requests.post(
+            "https://api.gemini.com/v1/completions",
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {os.getenv('GEMINI_API_KEY')}"
+            },
+            json={
+                "prompt": prompt,
+                "max_tokens": 100,
+                "temperature": 0.5
+            }
+        )
+        response = response.json()
+    else:
+        responcse = chatGPTResponse(prompt, model)
+    if not response:
+        return "エラーが発生しました"
+    
 
 def formatTextFromInfo(prompt):
     response = openai.ChatCompletion.create(

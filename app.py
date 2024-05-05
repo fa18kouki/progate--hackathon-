@@ -24,7 +24,7 @@ from gcs_client import CloudStorageManager
 # from . import MicrophoneStream
 from datetime import datetime, timedelta
 import ocr as gcpapi
-from llm import chatGPTResponse, formatTextFromImage, ESAdviceGPT
+from llm import chatGPTResponse, formatTextFromImage, ESAdviceGPT,formatTextFromInfo
 # from langchain.chains import OpenAIChain
 # from langchain.schema import Function
 
@@ -121,7 +121,7 @@ def sqlite_update(USER_ID, NICKNAME, MODEL, AGE, LIBERAL, RESIDENCE, INFO):
         WHERE user_id = ?
     """
 
-    cursor.execute(update_query, (nickname, model, user_id))
+    cursor.execute(update_query, (user_id, nickname,model,age,liberal,residence,info,user_id))
     conn.commit()
     conn.close()
 
@@ -243,6 +243,20 @@ def get_user_ids():
     finally:
         # データベース接続を閉じる
         conn.close()
+
+def set_self_introduction(user_id, self_introduction):
+    conn = sqlite3.connect('instance/db.sqlite3')
+    cursor = conn.cursor()
+
+    update_query = """
+        UPDATE users
+        SET self_introduction = ?
+        WHERE user_id = ?
+    """
+
+    cursor.execute(update_query, (self_introduction, user_id))
+    conn.commit()
+    conn.close()
 
 
 @app.route("/", methods=["GET"])
@@ -390,15 +404,14 @@ def handle_follow(event):
     db.session.commit()
     # ユーザーIDをログに記録
     app.logger.info(f"新しいユーザーが追加されました: {new_user.user_id}")  # 修正された行
-    # ユーザーに歓迎メッセージを送信
-    welcome_message = "ようこそ！私たちのサービスへ。まずは以下のフォーマットに従って自己紹介をお願いします。\n自己紹介: \n ニックネーム：\n年齢：\n居住地：\n学年：\n希望職種：\n簡単な経歴：\n"
-    line_bot_api.push_message(user_id, TextSendMessage(text=welcome_message))
+    welcome_message = "ご登録ありがとうございます。"+"ようこそブタチームの就活支援サービスへ！まずは以下のフォーマットに従って自己紹介をお願いします。"+ "\n自己紹介: \n ニックネーム：\n年齢：\n居住地：\n文理選択：\n学年：\n希望職種：\n簡単な経歴：\n"
+    service_description = "こちらは、音声認識を用いた面接練習や、画像認識でのES添削などができる就活生向けのLINEbotです。ESを添削してもらいたい場合は画像をアップロードし、面接練習をしたい場合は下のタブメニューから選んでください！"
+    messages = [
+        TextSendMessage(text=welcome_message),
+        TextSendMessage(text=service_description)
+    ]
 
-    # ユーザーにサービスの説明を送信
-    service_description = "こちらで写真や音声の保存が可能です。また、質問に答えることでより良いサービスを提供します。"
-    line_bot_api.push_message(
-        user_id, TextSendMessage(text=service_description))
-
+    line_bot_api.push_message(user_id, messages)
 
 @handler.add(PostbackEvent)
 def handle_postback(event):
@@ -440,20 +453,19 @@ def handle_message(event):
         user_message = event.message.text  # ユーザーからのメッセージを取得
         user_id = event.source.user_id  # ユーザーのIDを取得
         if event.message.text == "他のモデルを使用する":
-            line_bot_api.push_message(user_id, TextSendMessage(text="変更先のモデルを指定して下さい"))
-            if event.message.text == "gpt3.5":
-                changeLLMModel(event.source.user_id, "gpt3.5-turbo")
-                line_bot_api.push_message(user_id, TextSendMessage(text="GPT-3.5を使用します。"))
-            elif event.message.text == "gpt4":
-                changeLLMModel(event.source.user_id, "gpt-4-turbo")
-                line_bot_api.push_message(user_id, TextSendMessage(text="GPT-4を使用します。"))
-            elif event.message.text == "gemini":
-                changeLLMModel(event.source.user_id, "gemini-pro") 
-                line_bot_api.push_message(user_id, TextSendMessage(text="Geminiを使用します。"))
-            else:
-                line_bot_api.push_message(user_id, TextSendMessage(text="モデルの指定が不正です。"))
-            return
+            buttons_template = ButtonsTemplate(
+                title='あなたの選択', text='以下から選んでください', actions=[
+                    PostbackAction(label='gpt3.5を使用する', data='update:model,gpt3.5-turbo'),
+                    PostbackAction(label='gpt4を使用する', data='update:model,gpt4-turbo').
+                    PostbackAction(label='gemini1.5Proを使用する', data='update:model,gpt4-turbo')
+                ])
+            template_message = TemplateSendMessage(
+                alt_text='他のモデルを使用する', template=buttons_template)
+            line_bot_api.reply_message(
+                event.reply_token, template_message)
+            return 
         if "自己紹介文:" in user_message:
+            res = formatTextFromInfo(user_message)
             
             line_bot_api.reply_message(
                 event.reply_token,
